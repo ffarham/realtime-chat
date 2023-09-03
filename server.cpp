@@ -69,7 +69,7 @@ int main(int argc, char **argv){
     int BUFFERLEN = 1024;
     char BUFFER[BUFFERLEN];
     while(true){
-        memset(BUFFER, 0, BUFFERLEN);
+        std::memset(BUFFER, 0, BUFFERLEN);
 
         // receive from the client
         // important to null terminate buffers (having last char in buffer as null)
@@ -85,7 +85,7 @@ int main(int argc, char **argv){
         if (BUFFER[bytes_received-1] == '\n') BUFFER[bytes_received-1] = '\0';
 
 
-        std::cout << "@" << client_ip << ":" << client_port << ": " << BUFFER << std::endl;
+        std::cout << "@" << client_ip << ":" << client_port << ": " << BUFFER << '\n';
 
         // echo message back to the client
         BUFFER[bytes_received-1] = '\n';
@@ -95,7 +95,7 @@ int main(int argc, char **argv){
         }
     }
 
-    std::cout << "[INFO] Shutting socker down." << std::endl;
+    std::cout << "[INFO] Shutting socket down." << std::endl;
     // shut down both sides of the socket
     shutdown(client_fd, SHUT_RDWR);
 

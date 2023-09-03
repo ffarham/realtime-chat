@@ -3,64 +3,61 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <unistd.h>
 
-int main(){
+int main(int argc, char **argv){
 
-    sockaddr_in server_addr;
-    addrinfo *server;
+    if (argc < 3){
+        std::cerr << "Expecting: <hostname> <port>" << std::endl;
+        return 1;
+    }
 
-    // create a socket and get the file descripter
-    int client_fd;
-    if ((client_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0){
+    char* hostname = argv[1];
+    int port = atoi(argv[2]);
+
+    int client_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (client_fd < 0){
         std::cerr << "Failed to create socket!" << std::endl;
-        return -1;
-    }
-    std::cout << "[INFO] Successfully created socket." << std::endl;
-
-    // get host information
-    if (getaddrinfo("0.0.0.1", "7008", NULL, &server) != 0){
-        std::cerr << "Failed to get host information!" << std::endl;
-        return -2;
+        return 1;
     }
 
-    for (int i =0; i < 14; i++){
-        std::cout << server->ai_addr->sa_data[i] << std::endl;
+    sockaddr_in client_sock;
+    client_sock.sin_family = AF_INET;
+    client_sock.sin_port = htons(port);
+    // converts internet host address to network byte order (bianry)
+    inet_aton(hostname, &client_sock.sin_addr);
+
+    int conn_status = connect(client_fd, (sockaddr *) &client_sock, sizeof(client_sock));
+    if (conn_status < 0){
+        std::cerr << "Failed to connect to server!" << std::endl;
+        return 1;
     }
-
-    // if (server->ai_addr->sa_data == NULL) std::cout << "[INFO] No address information." << std::endl;
-
-    // std::cout << "[INFO] Retrieved host:"
-    //             << *(server->ai_addr) << " yup" << std::endl;
-
-    std::cout << "[INFO] Connecting to server..." << std::endl;
-    // fill address fields before attempting to connect to the server
-    std::memset(&server_addr, 0, sizeof(server_addr));
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(7007);
-
-    // Check if there is an address of the host
-    if (server->ai_addr->sa_len > 0)
-        std::memcpy((sockaddr_in *) &server_addr.sin_addr, (addrinfo *) server->ai_addr->sa_data, server->ai_addr->sa_len);
-    else {
-        std::cerr << "[ERROR] There is no a valid address for that hostname!\n";
-        return -3;
-    }
-
-    if (connect(client_fd, (sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
-        std::cerr << "Connection cannot be established!\n";
-        return -4;
-    }
-    std::cout << "[INFO] Connection established.\n";
-
-    // bind the socket to a port
-    // sockaddr_in client_addr;
-    // client_addr.sin_family = AF_INET;
-    // // converts to network byte order, which is the standard in packets
-    // client_addr.sin_port = htons(7007); // htons = host to network short
-    // inet_pton(AF_INET, "0.0.0.0", &client_addr.sin_addr); // converts internet adddress from text format to numeric binary format
-
     
+    std::cout << "[INFO] Connected to server." << std::endl;
+    
+    int BUFFERLEN = 1024;
+    char BUFFER[BUFFERLEN];
+    std::memset(BUFFER, 0, BUFFERLEN);
 
+    while(true){
+        std::string data;
+        std::cout << "send: ";
+        getline(std::cin, data);
+        std::memset(BUFFER,0,BUFFERLEN);
+        strcpy(BUFFER, data.c_str());
+        if(data == "exit") break;
 
+        int wr_status = write(client_fd, BUFFER, BUFFERLEN);
+        if (wr_status < 0) std::cerr << "Failed to write to server!" << std::endl;
 
+        std::memset(BUFFER,0, BUFFERLEN);
+
+        int rd_status = read(client_fd, BUFFER, BUFFERLEN-1);
+        if (rd_status < 0) std::cerr << "Failed to read from server!" << std::endl;
+
+        std::cout << "recv: " << BUFFER << std::endl;
+
+    }
+
+    close(client_fd);
 }
