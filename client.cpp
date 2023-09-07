@@ -4,16 +4,11 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <unistd.h>
+#include <sys/select.h>
+
+#include "error_handler.h"
 
 #define DEBUG false
-
-int err_handler(std::string msg, int fd){
-    std::cout << "[ERROR] " << msg << std::endl;
-    shutdown(fd, SHUT_RDWR);
-    close(fd);
-    
-    return 1;
-}
 
 int main(int argc, char **argv){
 
@@ -34,7 +29,7 @@ int main(int argc, char **argv){
 
     int client_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (client_fd < 0){
-        return err_handler("Failed to create socket!", client_fd);
+        return error_handler("Failed to create socket!", client_fd);
     }
 
     sockaddr_in client_sock;
@@ -44,7 +39,7 @@ int main(int argc, char **argv){
     inet_aton(hostname, &client_sock.sin_addr);
 
     int conn_status = connect(client_fd, (sockaddr *) &client_sock, sizeof(client_sock));
-    if (conn_status < 0) return err_handler("Failed to connect to server!", client_fd);
+    if (conn_status < 0) return error_handler("Failed to connect to server!", client_fd);
     
     std::cout << "[INFO] Welcome to the chatserver." << std::endl;
     
@@ -62,7 +57,7 @@ int main(int argc, char **argv){
         FD_SET(client_fd, &rfds);
 
         int select_status = select(client_fd+1, &rfds, NULL, NULL, NULL);
-        if ( select_status < 0 ) return err_handler("Failed to listen to multiple file descriptors.", client_fd);
+        if ( select_status < 0 ) return error_handler("Failed to listen to multiple file descriptors.", client_fd);
 
 #if DEBUG
         std::cout << "[DEBUG] FD_SET status: (std::cin," << FD_ISSET(0, &rfds) << "), (client_fd," << FD_ISSET(client_fd, &rfds) << ")." << std::endl;
@@ -82,17 +77,17 @@ int main(int argc, char **argv){
 #endif
 
             int wr_status = write(client_fd, BUFFER, BUFFERLEN);
-            if (wr_status < 0) return err_handler("Failed to write to server!", client_fd);
+            if (wr_status < 0) return error_handler("Failed to write to server!", client_fd);
 
         } else if ( FD_ISSET(client_fd, &rfds) ){
 
             int rd_status = read(client_fd, BUFFER, BUFFERLEN);
-            if (rd_status < 0) return err_handler("Failed to read from server!", client_fd);
+            if (rd_status < 0) return error_handler("Failed to read from server!", client_fd);
 
             std::cout << BUFFER << std::endl;
 
         } else {
-            return err_handler("Unexpected FD_SET state.", client_fd);
+            return error_handler("Unexpected FD_SET state.", client_fd);
         }
 
     }
