@@ -5,6 +5,8 @@
 #include <netdb.h>
 #include <unistd.h>
 
+#define DEBUG true
+
 int main(int argc, char **argv){
 
     if (argc < 3){
@@ -37,27 +39,33 @@ int main(int argc, char **argv){
     
     int BUFFERLEN = 1024;
     char BUFFER[BUFFERLEN];
-    std::memset(BUFFER, 0, BUFFERLEN);
+    std::memset(BUFFER, '\0', BUFFERLEN);
 
     while(true){
         std::string data;
         std::cout << "send: ";
-        getline(std::cin, data);
-        std::memset(BUFFER,0,BUFFERLEN);
+        std::getline(std::cin, data);
+        
         strcpy(BUFFER, data.c_str());
         if(data == "exit") break;
+
+#ifdef DEBUG
+        std::cout << "[DEBUG] writing to server..." << std::endl;
+#endif
 
         int wr_status = write(client_fd, BUFFER, BUFFERLEN);
         if (wr_status < 0) std::cerr << "Failed to write to server!" << std::endl;
 
-        std::memset(BUFFER,0, BUFFERLEN);
+        std::memset(BUFFER,'\0', BUFFERLEN);
 
-        int rd_status = read(client_fd, BUFFER, BUFFERLEN-1);
+        int rd_status = read(client_fd, BUFFER, BUFFERLEN);
         if (rd_status < 0) std::cerr << "Failed to read from server!" << std::endl;
 
         std::cout << "recv: " << BUFFER << std::endl;
+        std::memset(BUFFER,'\0',BUFFERLEN);
 
     }
 
+    shutdown(client_fd, SHUT_RDWR);
     close(client_fd);
 }
