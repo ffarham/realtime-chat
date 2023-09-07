@@ -3,8 +3,9 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <sys/select.h>
 
-#define DEBUG true
+#define DEBUG false
 
 int main(int argc, char **argv){
 
@@ -77,7 +78,7 @@ int main(int argc, char **argv){
         // receive from the client
         int bytes_received = recv(client_fd, BUFFER, BUFFERLEN, 0);
 
-#ifdef DEBUG
+#if DEBUG
         std::cout << "[DEBUG] Received " << bytes_received << " bytes." << std::endl;
 #endif
 
@@ -90,11 +91,11 @@ int main(int argc, char **argv){
             break;
         }
 
-#ifdef DEBUG
+#if DEBUG
         std::cout << "[DEBUG] printing buffer." << std::endl;
 #endif
 
-        std::cout << "@" << client_ip << ":" << client_port << ": " << BUFFER << std::endl;
+        std::cout << BUFFER << std::endl;
 
         // echo message back to the client
         int bytes_sent = send(client_fd, BUFFER, bytes_received, 0);
