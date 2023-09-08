@@ -7,8 +7,10 @@
 
 int error_handler(std::string msg, int fd){
     std::cout << "[ERROR] " << msg << std::endl;
-    shutdown(fd, SHUT_RDWR);
-    close(fd);
+    if ( fd >= 0 ){
+        shutdown(fd, SHUT_RDWR);
+        close(fd);
+    }
     
     return 1;
 }

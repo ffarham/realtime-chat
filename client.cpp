@@ -72,19 +72,19 @@ int main(int argc, char **argv){
 
             if(data == "exit") break;
 
-#if DEBUG
-            std::cout << "[DEBUG] writing to server..." << std::endl;
-#endif
-
             int wr_status = write(client_fd, BUFFER, BUFFERLEN);
             if (wr_status < 0) return error_handler("Failed to write to server!", client_fd);
 
         } else if ( FD_ISSET(client_fd, &rfds) ){
 
-            int rd_status = read(client_fd, BUFFER, BUFFERLEN);
-            if (rd_status < 0) return error_handler("Failed to read from server!", client_fd);
-
-            std::cout << BUFFER << std::endl;
+            int bytes_read = read(client_fd, BUFFER, BUFFERLEN);
+            if (bytes_read < 0) return error_handler("Failed to read from server!", client_fd);
+            else if (bytes_read == 0) {
+                std::cout << "[INFO] Lost connection to the chat server." << std::endl;
+                break;
+            } else {
+                std::cout << BUFFER << std::endl;
+            }
 
         } else {
             return error_handler("Unexpected FD_SET state.", client_fd);
@@ -92,8 +92,8 @@ int main(int argc, char **argv){
 
     }
 
-    std::cout << "[INFO] Closing connection to the chat server..." << std::endl; 
+    std::cout << "[INFO] Closing down the client..." << std::endl; 
 
-    shutdown(client_fd, SHUT_RDWR);
+    // shutdown(client_fd, SHUT_RDWR);
     close(client_fd);
 }
