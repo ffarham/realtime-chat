@@ -94,6 +94,6 @@ int main(int argc, char **argv){
 
     std::cout << "[INFO] Closing down the client..." << std::endl; 
 
-    // shutdown(client_fd, SHUT_RDWR);
+    shutdown(client_fd, SHUT_RDWR);
     close(client_fd);
 }
