@@ -6,14 +6,23 @@
 #include <unistd.h>
 #include <sys/select.h>
 
-#include "error_handler.h"
-
 #define DEBUG false
+
+int error_handler(std::string msg, int fd){
+    std::cout << "[ERROR] " << msg << '\n';
+    if ( fd >= 0 ){
+        std::cout << "[INFO] Closing socket " << fd << "...\n";
+        shutdown(fd, SHUT_RDWR);
+        close(fd);
+    }
+    
+    return 1;
+}
 
 int main(int argc, char **argv){
 
     if (argc < 3){
-        std::cerr << "Expecting: <hostname> <port>" << std::endl;
+        std::cerr << "Expecting: <hostname> <port>\n";
         return 1;
     }
 
@@ -23,7 +32,7 @@ int main(int argc, char **argv){
     std::string name;
     std::cout << "Enter name: ";
     std::getline(std::cin, name);
-    std::cout << std::endl;
+    std::cout << '\n';
     name += ": ";
     unsigned char name_len = name.size();
 
@@ -41,10 +50,11 @@ int main(int argc, char **argv){
     int conn_status = connect(client_fd, (sockaddr *) &client_sock, sizeof(client_sock));
     if (conn_status < 0) return error_handler("Failed to connect to server!", client_fd);
     
-    std::cout << "[INFO] Welcome to the chatserver." << std::endl;
+    std::cout << "[INFO] Welcome to the chatserver.\n";
     
     int BUFFERLEN = 1024;
     char BUFFER[BUFFERLEN];
+
 
     fd_set rfds;
 
@@ -60,7 +70,7 @@ int main(int argc, char **argv){
         if ( select_status < 0 ) return error_handler("Failed to listen to multiple file descriptors.", client_fd);
 
 #if DEBUG
-        std::cout << "[DEBUG] FD_SET status: (std::cin," << FD_ISSET(0, &rfds) << "), (client_fd," << FD_ISSET(client_fd, &rfds) << ")." << std::endl;
+        std::cout << "[DEBUG] FD_SET status: (std::cin," << FD_ISSET(0, &rfds) << "), (client_fd," << FD_ISSET(client_fd, &rfds) << ").\n";
 #endif
 
         if (FD_ISSET(0, &rfds)){
@@ -80,10 +90,10 @@ int main(int argc, char **argv){
             int bytes_read = read(client_fd, BUFFER, BUFFERLEN);
             if (bytes_read < 0) return error_handler("Failed to read from server!", client_fd);
             else if (bytes_read == 0) {
-                std::cout << "[INFO] Lost connection to the chat server." << std::endl;
+                std::cout << "[INFO] Lost connection to the chat server.\n";
                 break;
             } else {
-                std::cout << BUFFER << std::endl;
+                std::cout << BUFFER << '\n';
             }
 
         } else {
@@ -92,7 +102,7 @@ int main(int argc, char **argv){
 
     }
 
-    std::cout << "[INFO] Closing down the client..." << std::endl; 
+    std::cout << "[INFO] Closing down the client...\n"; 
 
     shutdown(client_fd, SHUT_RDWR);
     close(client_fd);
