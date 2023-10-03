@@ -1,7 +1,6 @@
 #include "threadpool.h"
 #include "server.h"
 #include "client_handler.h"
-#include <thread>
 #include <cstring>
 
 #include <iostream>
@@ -22,14 +21,14 @@ void ThreadPool::worker_function(){
 #if DEBUG
             {
                 std::lock_guard<std::mutex> lock_print(print_mutex);
-                std::cout << "[DEBUG] [" << std::this_thread::get_id() << "] acquired lock." << std::endl;
+                std::cout << "[DEBUG] [" << boost::this_thread::get_id() << "] acquired lock." << std::endl;
             }
 #endif
             while (this->work.size() == 0 && this->keep_alive) {
 #if DEBUG                
                 {
                     std::lock_guard<std::mutex> lock_print(print_mutex);
-                    std::cout << "[DEBUG] [" << std::this_thread::get_id() << "] waiting for work..." << std::endl; 
+                    std::cout << "[DEBUG] [" << boost::this_thread::get_id() << "] waiting for work..." << std::endl; 
                 }
 #endif
                 this->queue_notifier.wait(lock_pool);
@@ -39,7 +38,7 @@ void ThreadPool::worker_function(){
 #if DEBUG
             {
                 std::lock_guard<std::mutex> lock_print(print_mutex);
-                std::cout << "[DEBUG] [" << std::this_thread::get_id() << "] Queue size: " << work.size() << std::endl;
+                std::cout << "[DEBUG] [" << boost::this_thread::get_id() << "] Queue size: " << work.size() << std::endl;
             }
 #endif
             {
@@ -51,7 +50,7 @@ void ThreadPool::worker_function(){
 #if DEBUG
             {
                 std::lock_guard<std::mutex> lock_print(print_mutex);
-                std::cout << "[DEBUG] [" << std::this_thread::get_id() << "] Doing work on " << fd << std::endl;
+                std::cout << "[DEBUG] [" << boost::this_thread::get_id() << "] Doing work on " << fd << std::endl;
             }
 #endif 
 
@@ -62,14 +61,14 @@ void ThreadPool::worker_function(){
 #if DEBUG
             {
                 std::lock_guard<std::mutex> lock_print(print_mutex);
-                std::cout << "[DEBUG] [" << std::this_thread::get_id() << "] Completed work!" << std::endl;
+                std::cout << "[DEBUG] [" << boost::this_thread::get_id() << "] Completed work!" << std::endl;
             }
 #endif
     }
 #if DEBUG
         {
             std::lock_guard<std::mutex> lock_print(print_mutex);
-            std::cout << "[DEBUG] " << std::this_thread::get_id() << " is terminating." << std::endl;
+            std::cout << "[DEBUG] " << boost::this_thread::get_id() << " is terminating." << std::endl;
         }
 #endif
 }
@@ -78,12 +77,12 @@ ThreadPool::ThreadPool() : keep_alive(true) {
 
     for (int i = 0; i < NUM_WORKERS; i++){
         // TODO: optimise this
-        std::thread t(&ThreadPool::worker_function, this);
+        boost::thread t(&ThreadPool::worker_function, this);
         workers[i] = std::move(t);
 #if DEBUG
     {
         std::lock_guard<std::mutex> lock_print(print_mutex);
-        std::cout << "[DEBUG] [" << std::this_thread::get_id() << "] Created thread " << std::this_thread::get_id() << std::endl;
+        std::cout << "[DEBUG] [" << boost::this_thread::get_id() << "] Created thread " << boost::this_thread::get_id() << std::endl;
     }
 #endif
 
@@ -113,7 +112,7 @@ void ThreadPool::enqueue(int fd){
 #if DEBUG
     {
         std::lock_guard<std::mutex> lock_print(print_mutex);
-        std::cout << "[DEBUG] [" << std::this_thread::get_id() << "] Adding " << fd << " to the work queue." << std::endl;
+        std::cout << "[DEBUG] [" << bost::this_thread::get_id() << "] Adding " << fd << " to the work queue." << std::endl;
     }
 #endif
     std::lock_guard<std::mutex> lock(queue_mutex);

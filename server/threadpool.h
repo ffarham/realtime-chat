@@ -2,7 +2,8 @@
 
 #include <vector>
 #include <queue>
-#include <thread>
+//#include <thread>
+#include <boost/thread.hpp>
 #include <mutex>
 #include <condition_variable>
 
@@ -13,7 +14,7 @@ private:
     std::queue<int> work;
     std::mutex pool_mutex;
     std::condition_variable queue_notifier;
-    std::thread workers[NUM_WORKERS];
+    boost::thread workers[NUM_WORKERS];
     bool keep_alive;
     void worker_function();
 
