@@ -5,6 +5,7 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <sys/select.h>
+#include <cstring>
 
 #define DEBUG false
 
