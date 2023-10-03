@@ -2,6 +2,7 @@
 #include "server.h"
 #include "client_handler.h"
 #include <thread>
+#include <cstring>
 
 #include <iostream>
 #include <sys/socket.h>

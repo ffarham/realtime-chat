@@ -10,6 +10,7 @@
 #include <sys/select.h>
 #include <mutex>
 #include <algorithm>
+#include <cstring>
 
 std::mutex print_mutex;
 std::mutex connected_fds_mutex;

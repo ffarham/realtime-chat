@@ -28,7 +28,7 @@ int handle_client_request(int fd, int bytes_received, char *BUFFER){
     // tracked file descriptors vector before hand. Depending on the success, we will add the 
     // file descriptor back to the tracker list.
 
-    std::__1::unordered_map<int, client_info_pair>::iterator entry;
+    std::unordered_map<int, client_info_pair>::iterator entry;
     {   // get the entry for where the client meta data is stored
         // TODO: improve this
         std::lock_guard<std::mutex> lock_client_store(client_store_mutex);
