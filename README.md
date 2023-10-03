@@ -4,6 +4,14 @@ Challenge: https://codingchallenges.fyi/challenges/challenge-realtime-chat
 
 The project implements both client and server in C++.
 
+### Set-up
+The project requires {C++ compiler, CMake, [Boost](https://www.geeksforgeeks.org/how-to-install-boost-library-in-cpp-on-linux/)}. Use the following command to set up for running/further development.
+
+```
+sudo apt install g++ cmake libboost-all-dev 
+```
+
+
 ### Client
 Simple client that runs on a port and connects to the server using TCP.
 
